@@ -25,3 +25,6 @@ Route::get('products', function () {
     return Product::all();
 });
 
+Route::prefix('orders/')->controller(OrderController::class)->group(function () {
+    Route::get('', 'all');
+});
