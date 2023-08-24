@@ -19,7 +19,11 @@ return new class extends Migration
             $table->foreignIdFor(User::class);
             $table->unsignedInteger('amount');
             $table->string('gateway_type', '20');
+
+            /** ENUM */
             $table->string('status', '50');
+            /** end ENUM */
+
             $table->timestamp('paid_at');
             $table->timestamps();
         });

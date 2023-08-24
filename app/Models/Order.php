@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OrderStatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,7 +17,8 @@ class Order extends Model
         'reserved_at'
     ];
     protected $casts = [
-        'reserved_at' => 'datetime'
+        'reserved_at' => 'datetime',
+        'status' => OrderStatusEnum::class
     ];
 
     /**

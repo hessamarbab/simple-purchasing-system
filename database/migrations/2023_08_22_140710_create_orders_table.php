@@ -15,7 +15,11 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(User::class);
+
+            /** ENUM */
             $table->string('status',50);
+            /** end ENUM */
+
             $table->timestamp('reserved_at');
             $table->timestamps();
         });
