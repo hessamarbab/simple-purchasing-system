@@ -8,12 +8,12 @@ class OrderRepositoryCachingDecorator implements OrderRepositoryContract
 {
 
     /**
-     * @param OrderElequentRepository $orderRepository
+     * @param OrderEloquentRepository $orderRepository
      * @param int $ttl
      */
     public function __construct(
-        protected OrderElequentRepository $orderRepository,
-        int $ttl
+        protected OrderEloquentRepository $orderRepository,
+        protected int $ttl = 60
     ) {}
 
     /**
@@ -21,7 +21,7 @@ class OrderRepositoryCachingDecorator implements OrderRepositoryContract
      */
     public function all(): Collection
     {
-        // it's not ok to cache all things ever !!!
+        // it's not ok to cache all things
         return $this->orderRepository->all();
     }
 }

@@ -2,31 +2,31 @@
 
 namespace App\Repositories\Order;
 
-use App\Repositories\Order\OrderElequentRepository;
-
 class OrderRepositoryBuilder
 {
-    private $ttl = 0;
+    private bool $useCache = false;
 
     public function __construct(
-        private OrderElequentRepository $orderRepository
-    ) {}
+        private OrderRepositoryContract $orderRepository = new OrderEloquentRepository()
+    )
+    {
+    }
 
     public function useCache(int $ttl)
     {
-        $this->ttl = $ttl;
+        if($this->useCache) {
+            return $this;
+        }
+        $this->orderRepository = new OrderRepositoryCachingDecorator($this->orderRepository, $ttl);
+        $this->useCache = true;
         return $this;
     }
 
     /**
      * @return OrderRepositoryContract
      */
-    public function build() : OrderRepositoryContract
+    public function build(): OrderRepositoryContract
     {
-        if ($this->ttl != 0) {
-            return new OrderRepositoryCachingDecorator($this->orderRepository, $this->ttl);
-        } else {
-            return $this->orderRepository;
-        }
+        return $this->orderRepository;
     }
 }

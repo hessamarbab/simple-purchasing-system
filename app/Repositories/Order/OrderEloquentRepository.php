@@ -5,7 +5,7 @@ namespace App\Repositories\Order;
 use App\Models\Order;
 use Illuminate\Database\Eloquent\Collection;
 
-class OrderElequentRepository Implements OrderRepositoryContract
+class OrderEloquentRepository Implements OrderRepositoryContract
 {
     /**
      * @return Collection
