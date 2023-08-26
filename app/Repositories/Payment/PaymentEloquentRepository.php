@@ -5,6 +5,7 @@ namespace App\Repositories\Payment;
 use App\Enums\PaymentStatusEnum;
 use App\Models\Payment;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
 
 class PaymentEloquentRepository implements PaymentRepositoryContract
 {
@@ -32,7 +33,10 @@ class PaymentEloquentRepository implements PaymentRepositoryContract
 
     public function apply(int $paymentId)
     {
-        Payment::where('id', $paymentId)->update(['status' => PaymentStatusEnum::COMPLETED]);
+        Payment::where('id', $paymentId)->update([
+                'status' => PaymentStatusEnum::COMPLETED,
+                'paid_at' => Carbon::now()
+            ]);
     }
 
     public function fail(int $paymentId)

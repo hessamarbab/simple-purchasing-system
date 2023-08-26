@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignIdFor(Order::class);
             $table->foreignIdFor(User::class);
             $table->unsignedInteger('amount');
-            $table->string('gateway_type', '20');
+            $table->string('gateway_type', '20')->index();
 
             /** ENUM */
             $table->string('status', '50');
