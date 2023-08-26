@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('status',50);
             /** end ENUM */
 
-            $table->timestamp('reserved_at');
+            $table->timestamp('reserved_at')->nullable();
             $table->timestamps();
         });
     }

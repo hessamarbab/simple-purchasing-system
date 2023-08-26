@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('status', '50');
             /** end ENUM */
 
-            $table->timestamp('paid_at');
+            $table->timestamp('paid_at')->nullable();
             $table->timestamps();
         });
     }
