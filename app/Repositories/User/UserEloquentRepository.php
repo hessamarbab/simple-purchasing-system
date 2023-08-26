@@ -10,4 +10,9 @@ class UserEloquentRepository implements UserRepositoryContract
     {
         return User::all();
     }
+
+    public function getByUsername(string $username): array
+    {
+        return User::where('username', $username)->first()->toArray();
+    }
 }
