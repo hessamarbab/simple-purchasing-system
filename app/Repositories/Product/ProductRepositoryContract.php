@@ -8,5 +8,7 @@ interface ProductRepositoryContract
 
     public function reduce(int $product_id, int $quantity);
 
-    public function getById(int $id);
+    public function getById(int $id): array;
+
+    public function enhance(int $product_id, int $quantity);
 }

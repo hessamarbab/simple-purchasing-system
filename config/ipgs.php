@@ -1,5 +1,9 @@
 <?php
+
+use App\strategies\Ipg\IpgA;
+use App\strategies\Ipg\IpgB;
+
 return [
-    'ipga' => \App\strategies\Ipg\IpgA::class,
-    'ipgb' => \App\strategies\Ipg\IpgB::class,
+    'ipga' => IpgA::class,
+    'ipgb' => IpgB::class,
 ];

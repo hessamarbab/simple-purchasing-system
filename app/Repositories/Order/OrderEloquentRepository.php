@@ -8,7 +8,7 @@ use App\Models\OrderItem;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
-class OrderEloquentRepository Implements OrderRepositoryContract
+class OrderEloquentRepository implements OrderRepositoryContract
 {
     /**
      * @return Collection
@@ -18,31 +18,56 @@ class OrderEloquentRepository Implements OrderRepositoryContract
         return Order::with('orderItems')->get();
     }
 
-    public function create(int $user_id, OrderStatusEnum $status)
+    /**
+     * @param int $user_id
+     * @return array
+     */
+    public function create(int $user_id): array
     {
         Order::unguard();
-        $orderData = [
+        $out = Order::create([
             'user_id' => $user_id,
-            'status' => $status
-        ];
-        if($status == OrderStatusEnum::RESERVED) {
-            $orderData['reserved_at'] = Carbon::now();
-        }
-        $out = Order::create($orderData);
+            'status' => OrderStatusEnum::RESERVED,
+            'reserved_at' => Carbon::now()
+        ])->toArray();
         Order::reguard();
         return $out;
     }
 
+    /**
+     * @param int $order_id
+     * @param int $user_id
+     * @param int $product_id
+     * @param int $quantity
+     * @return void
+     */
     public function createItem(int $order_id, int $user_id, int $product_id, int $quantity)
     {
         OrderItem::unguard();
-        $out = OrderItem::create([
+        OrderItem::create([
             'order_id' => $order_id,
             'user_id' => $user_id,
             'product_id' => $product_id,
             'quantity' => $quantity
         ]);
         OrderItem::reguard();
-        return $out;
+    }
+
+    public function apply(int $order_id)
+    {
+        Order::where('id', $order_id)->update(['status' => OrderStatusEnum::PERFORMED]);
+    }
+
+    public function fail(int $order_id)
+    {
+        Order::where('id', $order_id)->update(['status' => OrderStatusEnum::FAILED]);
+    }
+
+
+    public function getItems(int $order_id): array
+    {
+        // TODO: Implement getItems() method.
+        return OrderItem::query()->select('product_id', 'quantity')
+                ->where('order_id', $order_id)->get()->toArray();
     }
 }

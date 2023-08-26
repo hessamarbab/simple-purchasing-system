@@ -4,25 +4,48 @@ namespace App\Repositories\Payment;
 
 use App\Enums\PaymentStatusEnum;
 use App\Models\Payment;
+use Illuminate\Database\Eloquent\Collection;
 
 class PaymentEloquentRepository implements PaymentRepositoryContract
 {
-    public function all()
+    /**
+     * @return Collection
+     */
+    public function all(): Collection
     {
         return Payment::all();
     }
 
-    public function create(int $user_id, int $order_id, int $amount, string $ipg, PaymentStatusEnum $status)
+    public function create(int $user_id, int $order_id, int $amount, string $ipg): array
     {
         Payment::unguard();
         $out = Payment::create([
             'user_id' => $user_id,
             'order_id' => $order_id,
-            'status' => $status,
+            'status' => PaymentStatusEnum::PENDING,
             'amount' => $amount,
             'gateway_type' => $ipg
-        ]);
+        ])->toArray();
         Payment::reguard();
         return $out;
+    }
+
+    public function apply(int $paymentId)
+    {
+        Payment::where('id', $paymentId)->update(['status' => PaymentStatusEnum::COMPLETED]);
+    }
+
+    public function fail(int $paymentId)
+    {
+        Payment::where('id', $paymentId)->update(['status' => PaymentStatusEnum::CANCELED]);
+    }
+
+    /**
+     * @param int $paymentId
+     * @return array
+     */
+    public function getById(int $paymentId): array
+    {
+        return Payment::find($paymentId)->toArray();
     }
 }

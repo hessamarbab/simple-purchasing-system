@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\OrderConfirmRequest;
 use App\Http\Requests\OrderReserveRequest;
+use App\Repositories\Order\OrderRepositoryCachingDecorator;
 use App\Repositories\Order\OrderRepositoryContract;
+use App\Repositories\User\UserRepositoryCachingDecorator;
 use App\Repositories\User\UserRepositoryContract;
+use App\Services\Purchase\PurchaseService;
 use App\Services\Purchase\PurchaseServiceContract;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -21,7 +25,7 @@ class OrderController extends Controller
      */
     public function all(): \Illuminate\Foundation\Application|Response|Application|ResponseFactory
     {
-        /** @var \App\Repositories\Order\OrderRepositoryCachingDecorator $orderRepositoryBuilder */
+        /** @var OrderRepositoryCachingDecorator $orderRepositoryBuilder */
         $orderRepositoryBuilder = app()->make(OrderRepositoryContract::class);
         return response($orderRepositoryBuilder->all(), 200);
     }
@@ -34,10 +38,10 @@ class OrderController extends Controller
      */
     public function reserve(OrderReserveRequest $request): \Illuminate\Foundation\Application|Response|Application|ResponseFactory
     {
-        /** @var \App\Services\Purchase\PurchaseService $purchaseService */
+        /** @var PurchaseService $purchaseService */
         $purchaseService = app()->make(PurchaseServiceContract::class);
 
-        /** @var \App\Repositories\User\UserRepositoryCachingDecorator $userRepository */
+        /** @var UserRepositoryCachingDecorator $userRepository */
         $userRepository = app()->make(UserRepositoryContract::class);
 
 
@@ -49,10 +53,21 @@ class OrderController extends Controller
         $items = $request->input('items');
         $bankUrl = $purchaseService->reserve($user, $items, $ipg);
         $response = [
-            'message' => 'successfully reserved for confirm your purchase use bank urls : success if paid , failed if not paid',
+            'message' => 'successfully reserved for confirm your purchase use bank urls " .
+                ": success if paid , failed if not paid',
             'success_url' => $bankUrl . "?success=1",
             'failed_url' => $bankUrl . "?success=0",
         ];
         return response(json_encode($response), 200);
+    }
+
+    public function confirm($bank_kind, $payment_code, OrderConfirmRequest $request)
+    {
+        /** @var PurchaseService $purchaseService */
+        $purchaseService = app()->make(PurchaseServiceContract::class);
+
+        $purchaseService->confirm($bank_kind, $payment_code, $request->input('success'));
+
+        return response(null, 201);
     }
 }

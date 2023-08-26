@@ -25,9 +25,15 @@ class ProductRepositoryCachingDecorator implements ProductRepositoryContract
         $this->productRepository->reduce($product_id, $quantity);
     }
 
-    public function getById(int $id)
+    public function getById(int $id): array
     {
         // TODO: Implement getById() method.
         return $this->productRepository->getById($id);
+    }
+
+    public function enhance(int $product_id, int $quantity)
+    {
+        // TODO: Implement enhance() method.
+        $this->productRepository->enhance($product_id, $quantity);
     }
 }

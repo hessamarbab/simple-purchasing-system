@@ -10,6 +10,7 @@ use App\Repositories\Atomic\DbTransactionRepositoryContract;
 use App\Repositories\Order\OrderRepositoryContract;
 use App\Repositories\Payment\PaymentRepositoryContract;
 use App\Repositories\Product\ProductRepositoryContract;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Throwable;
 
 class PurchaseService implements PurchaseServiceContract
@@ -22,10 +23,12 @@ class PurchaseService implements PurchaseServiceContract
      */
     public function __construct(
         protected DbTransactionRepositoryContract $dbRepo,
-        protected OrderRepositoryContract $orderRepo,
-        protected PaymentRepositoryContract $paymentRepo,
-        protected ProductRepositoryContract $productRepo
-    ) {}
+        protected OrderRepositoryContract         $orderRepo,
+        protected PaymentRepositoryContract       $paymentRepo,
+        protected ProductRepositoryContract       $productRepo
+    )
+    {
+    }
 
     /**
      * @param array $user
@@ -38,33 +41,46 @@ class PurchaseService implements PurchaseServiceContract
         /** @var IpgDriver $ipgDriver */
         $ipgDriver = app()->makeWith(
             IpgDriverContract::class, [
-                'ipgStrategy' => app()->make(config('ipgs.'.$ipg))
+                'ipgStrategy' => app()->make(config('ipgs.' . $ipg))
             ]
         );
+        $paymentId = $this->reserveInDatabase($user, $items, $ipg);
+
+        return $ipgDriver->generatePaymentUrl($paymentId);
+    }
+
+    /**
+     * @param array $user
+     * @param array $items
+     * @param string $ipg
+     * @return int
+     * @throws Throwable
+     */
+    private function reserveInDatabase(array $user, array $items, string $ipg): int
+    {
         $this->dbRepo->beginTransaction();
         try {
-            $order = $this->orderRepo->create($user['id'], OrderStatusEnum::RESERVED);
-            foreach ($items as $item)
-            {
+            $order = $this->orderRepo->create($user['id']);
+            foreach ($items as $item) {
                 $this->productRepo->reduce($item['product_id'], $item['quantity']);
-                $this->orderRepo->createItem($order['id'], $user['id'], $item['product_id'], $item['quantity']);
+                $this->orderRepo->createItem($order['id'], $user['id'],
+                    $item['product_id'], $item['quantity']);
             }
             $amount = $this->calculateAmount($items);
-            $paymentId = $this->paymentRepo->create($user['id'], $order['id'], $amount, $ipg,PaymentStatusEnum::PENDING)->id;
+            $paymentId = $this->paymentRepo->create($user['id'], $order['id'], $amount, $ipg)['id'];
             $this->dbRepo->commit();
         } catch (Throwable $e) {
             $this->dbRepo->rollback();
             throw $e;
         }
-        return $ipgDriver->generatePaymentUrl($paymentId);
+        return $paymentId;
     }
 
-    public function confirm(string $bank_kind, string $payment_code, bool $success)
-    {
-       // if ()
-    }
-
-    private function calculateAmount(array $items)
+    /**
+     * @param array $items
+     * @return int
+     */
+    private function calculateAmount(array $items): int
     {
         $amount = 0;
         foreach ($items as $item) {
@@ -72,6 +88,72 @@ class PurchaseService implements PurchaseServiceContract
             $amount += $item['quantity'] * $product['price'];
         }
         return $amount;
+    }
+
+    /**
+     * @param string $bank_kind
+     * @param string $payment_code
+     * @param bool $success
+     * @return void
+     * @throws Throwable
+     * @throws BindingResolutionException
+     */
+    public function confirm(string $bank_kind, string $payment_code, bool $success)
+    {
+        /** @var IpgDriver $ipgDriver */
+        $ipgDriver = app()->makeWith(
+            IpgDriverContract::class, [
+                'ipgStrategy' => app()->make(config('ipgs.' . $bank_kind))
+            ]
+        );
+        $paymentId = $ipgDriver->getPaymentIdByCode($payment_code);
+        if ($success) {
+            $this->applyInDatabase($paymentId);
+        } else {
+            $this->cancelInDatabase($paymentId);
+        }
+    }
+
+    /**
+     * @param int $paymentId
+     * @return void
+     * @throws Throwable
+     */
+    private function applyInDatabase(int $paymentId)
+    {
+        $this->dbRepo->beginTransaction();
+        try {
+            $payment = $this->paymentRepo->getById($paymentId);
+            $this->paymentRepo->apply($paymentId);
+            $this->orderRepo->apply($payment['order_id']);
+            $this->dbRepo->commit();
+        } catch (Throwable $e) {
+            $this->dbRepo->rollback();
+            throw $e;
+        }
+    }
+
+    /**
+     * @param int $paymentId
+     * @return void
+     * @throws Throwable
+     */
+    private function cancelInDatabase(int $paymentId)
+    {
+        $this->dbRepo->beginTransaction();
+        try {
+            $payment = $this->paymentRepo->getById($paymentId);
+            $this->paymentRepo->fail($paymentId);
+            $this->orderRepo->fail($payment['order_id']);
+            $items = $this->orderRepo->getItems($payment['order_id']);
+            foreach ($items as $item) {
+                $this->productRepo->enhance($item['product_id'], $item['quantity']);
+            }
+            $this->dbRepo->commit();
+        } catch (Throwable $e) {
+            $this->dbRepo->rollback();
+            throw $e;
+        }
     }
 
 
