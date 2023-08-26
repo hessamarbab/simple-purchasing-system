@@ -3,6 +3,7 @@
 namespace App\Repositories\Payment;
 
 use App\Enums\PaymentStatusEnum;
+use App\Exceptions\CustomizedException;
 use App\Models\Payment;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
@@ -33,15 +34,23 @@ class PaymentEloquentRepository implements PaymentRepositoryContract
 
     public function apply(int $paymentId)
     {
-        Payment::where('id', $paymentId)->update([
+        if(!Payment::where('id', $paymentId)
+            ->where('status', '!=', PaymentStatusEnum::COMPLETED)
+            ->update([
                 'status' => PaymentStatusEnum::COMPLETED,
                 'paid_at' => Carbon::now()
-            ]);
+            ])) {
+                throw new CustomizedException("only one time you can call confirm page");
+        }
     }
 
     public function fail(int $paymentId)
     {
-        Payment::where('id', $paymentId)->update(['status' => PaymentStatusEnum::CANCELED]);
+        if(!Payment::where('id', $paymentId)
+            ->where('status', '!=', PaymentStatusEnum::CANCELED)
+            ->update(['status' => PaymentStatusEnum::CANCELED])) {
+                throw new CustomizedException("only one time you can call confirm page");
+        }
     }
 
     /**
