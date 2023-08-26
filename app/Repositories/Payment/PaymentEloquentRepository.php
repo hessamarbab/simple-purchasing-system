@@ -35,7 +35,7 @@ class PaymentEloquentRepository implements PaymentRepositoryContract
     public function apply(int $paymentId)
     {
         if(!Payment::where('id', $paymentId)
-            ->where('status', '!=', PaymentStatusEnum::COMPLETED)
+            ->where('status', '==', PaymentStatusEnum::PENDING)
             ->update([
                 'status' => PaymentStatusEnum::COMPLETED,
                 'paid_at' => Carbon::now()
@@ -47,7 +47,7 @@ class PaymentEloquentRepository implements PaymentRepositoryContract
     public function fail(int $paymentId)
     {
         if(!Payment::where('id', $paymentId)
-            ->where('status', '!=', PaymentStatusEnum::CANCELED)
+            ->where('status', '==', PaymentStatusEnum::PENDING)
             ->update(['status' => PaymentStatusEnum::CANCELED])) {
                 throw new CustomizedException("only one time you can call confirm page");
         }
