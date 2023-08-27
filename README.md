@@ -7,6 +7,7 @@
 # Run Application
 
 ```bash
+    composer install
     sail up -d
     sail artisan migrate
     sail artisan db:seed
