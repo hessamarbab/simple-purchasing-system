@@ -140,7 +140,15 @@ Content-Type : application/json
     "message": "only one time you can call confirm page"
 }
 ```
+### Or return like this if you use wrong payment_code:
+- status code **404**
+```json
+{
+	"message": "Not Found"
+}
+```
 ### or you may get an validation error like this :
+- status code **422**
 ```json
 {
 	"message": "The success field must be true or false.",

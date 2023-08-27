@@ -74,7 +74,7 @@ class OrderRepositoryCachingDecorator implements OrderRepositoryContract
         $cacheKey = self::ORDER_CACHE_PREFIX . $order_id;
         $order = Cache::get($cacheKey);
         if ($order != null) {
-            $order->status = OrderStatusEnum::PERFORMED->value;
+            $order['status'] = OrderStatusEnum::PERFORMED->value;
             Cache::put($cacheKey, $order, $this->ttl);
         }
         $this->orderRepository->apply($order_id);

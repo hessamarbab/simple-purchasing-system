@@ -4,8 +4,6 @@ namespace App\Services\Purchase;
 
 use App\Driver\Ipg\IpgDriver;
 use App\Driver\Ipg\IpgDriverContract;
-use App\Enums\OrderStatusEnum;
-use App\Enums\PaymentStatusEnum;
 use App\Exceptions\CustomizedException;
 use App\Repositories\Atomic\DbTransactionRepositoryContract;
 use App\Repositories\Order\OrderRepositoryContract;
@@ -66,12 +64,12 @@ class PurchaseService implements PurchaseServiceContract
         $this->dbRepo->beginTransaction();
         try {
             $order = $this->orderRepo->create($user['id']);
+            $amount = $this->calculateAmount($items);
             foreach ($items as $item) {
                 $this->productRepo->reduce($item['product_id'], $item['quantity']);
                 $this->orderRepo->createItem($order['id'], $user['id'],
                     $item['product_id'], $item['quantity']);
             }
-            $amount = $this->calculateAmount($items);
             $paymentId = $this->paymentRepo->create($user['id'], $order['id'], $amount, $ipg)['id'];
             $this->dbRepo->commit();
         } catch (Throwable $e) {

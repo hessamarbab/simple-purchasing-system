@@ -76,6 +76,6 @@ class PaymentEloquentRepository implements PaymentRepositoryContract
      */
     public function getById(int $paymentId): array
     {
-        return Payment::find($paymentId)->toArray();
+        return Payment::findOrFail($paymentId)->toArray();
     }
 }

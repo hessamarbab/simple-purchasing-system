@@ -32,8 +32,8 @@ class ProductRepositoryCachingDecorator implements ProductRepositoryContract
         $cacheKey = self::PRODUCT_CACHE_PREFIX . $product_id;
         $product = Cache::get($cacheKey);
         if ($product != null) {
-            $product->inventory -= $quantity;
-            if($product->inventory < 0) {
+            $product['inventory'] -= $quantity;
+            if($product['inventory'] < 0) {
                 throw new CustomizedException("there isn't enough inventory");
             }
             Cache::put($cacheKey, $product, $this->ttl);
@@ -59,7 +59,7 @@ class ProductRepositoryCachingDecorator implements ProductRepositoryContract
         $cacheKey = self::PRODUCT_CACHE_PREFIX . $product_id;
         $product = Cache::get($cacheKey);
         if ($product != null) {
-            $product->inventory += $quantity;
+            $product['inventory'] += $quantity;
             Cache::put($cacheKey, $product, $this->ttl);
         }
         $this->productRepository->enhance($product_id, $quantity);
