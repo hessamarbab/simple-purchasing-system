@@ -32,6 +32,10 @@ class OrderRepositoryCachingDecorator implements OrderRepositoryContract
         return $this->orderRepository->all();
     }
 
+    /**
+     * @param int $user_id
+     * @return array
+     */
     public function create(int $user_id): array
     {
         $order = $this->orderRepository->create($user_id);
@@ -40,6 +44,13 @@ class OrderRepositoryCachingDecorator implements OrderRepositoryContract
         return $order;
     }
 
+    /**
+     * @param int $order_id
+     * @param int $user_id
+     * @param int $product_id
+     * @param int $quantity
+     * @return void
+     */
     public function createItem(int $order_id, int $user_id, int $product_id, int $quantity)
     {
         $orderItem = $this->orderRepository->createItem($order_id, $user_id, $product_id, $quantity);
@@ -54,6 +65,10 @@ class OrderRepositoryCachingDecorator implements OrderRepositoryContract
         } catch (\Throwable $e) {}
     }
 
+    /**
+     * @param int $order_id
+     * @return void
+     */
     public function apply(int $order_id)
     {
         $cacheKey = self::ORDER_CACHE_PREFIX . $order_id;
@@ -65,6 +80,10 @@ class OrderRepositoryCachingDecorator implements OrderRepositoryContract
         $this->orderRepository->apply($order_id);
     }
 
+    /**
+     * @param int $order_id
+     * @return void
+     */
     public function fail(int $order_id)
     {
         $cacheKey = self::ORDER_CACHE_PREFIX . $order_id;
@@ -76,6 +95,10 @@ class OrderRepositoryCachingDecorator implements OrderRepositoryContract
         $this->orderRepository->fail($order_id);
     }
 
+    /**
+     * @param int $order_id
+     * @return array
+     */
     public function getItems(int $order_id): array
     {
         try {

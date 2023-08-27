@@ -2,13 +2,20 @@
 
 namespace App\Repositories\Atomic;
 
-use PhpParser\Builder\Interface_;
-
 interface DbTransactionRepositoryContract
 {
+    /**
+     * @return void
+     */
     public function beginTransaction();
 
+    /**
+     * @return void
+     */
     public function commit();
 
+    /**
+     * @return void
+     */
     public function rollback();
 }

@@ -18,6 +18,13 @@ class PaymentEloquentRepository implements PaymentRepositoryContract
         return Payment::all();
     }
 
+    /**
+     * @param int $user_id
+     * @param int $order_id
+     * @param int $amount
+     * @param string $ipg
+     * @return array
+     */
     public function create(int $user_id, int $order_id, int $amount, string $ipg): array
     {
         Payment::unguard();
@@ -32,6 +39,11 @@ class PaymentEloquentRepository implements PaymentRepositoryContract
         return $out;
     }
 
+    /**
+     * @param int $paymentId
+     * @return void
+     * @throws CustomizedException
+     */
     public function apply(int $paymentId)
     {
         if(!Payment::where('id', $paymentId)
@@ -44,6 +56,11 @@ class PaymentEloquentRepository implements PaymentRepositoryContract
         }
     }
 
+    /**
+     * @param int $paymentId
+     * @return void
+     * @throws CustomizedException
+     */
     public function fail(int $paymentId)
     {
         if(!Payment::where('id', $paymentId)

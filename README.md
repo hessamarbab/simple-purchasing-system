@@ -11,6 +11,10 @@
     sail artisan migrate
     sail artisan db:seed
 ```
+### for run test :
+```bash
+sail artisan test
+```
 
 # Apis 
 ## Headers

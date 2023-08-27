@@ -61,6 +61,14 @@ class OrderController extends Controller
         return response(json_encode($response), 200);
     }
 
+    /**
+     * @param $bank_kind
+     * @param $payment_code
+     * @param OrderConfirmRequest $request
+     * @return Application|ResponseFactory|\Illuminate\Foundation\Application|Response
+     * @throws BindingResolutionException
+     * @throws \Throwable
+     */
     public function confirm($bank_kind, $payment_code, OrderConfirmRequest $request)
     {
         /** @var PurchaseService $purchaseService */

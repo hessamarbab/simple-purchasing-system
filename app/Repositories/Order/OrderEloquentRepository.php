@@ -53,17 +53,29 @@ class OrderEloquentRepository implements OrderRepositoryContract
         OrderItem::reguard();
     }
 
+    /**
+     * @param int $order_id
+     * @return void
+     */
     public function apply(int $order_id)
     {
         Order::where('id', $order_id)->update(['status' => OrderStatusEnum::PERFORMED]);
     }
 
+    /**
+     * @param int $order_id
+     * @return void
+     */
     public function fail(int $order_id)
     {
         Order::where('id', $order_id)->update(['status' => OrderStatusEnum::FAILED]);
     }
 
 
+    /**
+     * @param int $order_id
+     * @return array
+     */
     public function getItems(int $order_id): array
     {
         return OrderItem::query()->select('product_id', 'quantity')

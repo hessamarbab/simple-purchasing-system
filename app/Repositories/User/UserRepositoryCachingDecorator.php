@@ -2,6 +2,7 @@
 
 namespace App\Repositories\User;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class UserRepositoryCachingDecorator implements UserRepositoryContract
@@ -17,12 +18,19 @@ class UserRepositoryCachingDecorator implements UserRepositoryContract
         protected UserRepositoryContract $userRepository = new UserEloquentRepository()
     ){}
 
+    /**
+     * @return Collection
+     */
     public function all()
     {
         // it's not ok to cache all things
         return $this->userRepository->all();
     }
 
+    /**
+     * @param string $username
+     * @return array
+     */
     public function getByUsername(string $username): array
     {
         $cacheKey = self::USER_CACHE_PREFIX . self::GET_BY_USERNAME . $username;

@@ -4,10 +4,14 @@ namespace App\Repositories\Product;
 
 use App\Exceptions\CustomizedException;
 use App\Models\Product;
+use Illuminate\Database\Eloquent\Collection;
 
 class ProductEloquentRepository implements ProductRepositoryContract
 {
-    public function all()
+    /**
+     * @return Collection
+     */
+    public function all(): Collection
     {
         return Product::all();
     }
@@ -25,11 +29,20 @@ class ProductEloquentRepository implements ProductRepositoryContract
         }
     }
 
+    /**
+     * @param int $id
+     * @return array
+     */
     public function getById(int $id): array
     {
         return Product::find($id)->toArray();
     }
 
+    /**
+     * @param int $product_id
+     * @param int $quantity
+     * @return void
+     */
     public function enhance(int $product_id, int $quantity)
     {
         Product::where(['id' => $product_id])->increment('inventory', $quantity);

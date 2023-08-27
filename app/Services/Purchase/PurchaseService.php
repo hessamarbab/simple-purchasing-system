@@ -6,6 +6,7 @@ use App\Driver\Ipg\IpgDriver;
 use App\Driver\Ipg\IpgDriverContract;
 use App\Enums\OrderStatusEnum;
 use App\Enums\PaymentStatusEnum;
+use App\Exceptions\CustomizedException;
 use App\Repositories\Atomic\DbTransactionRepositoryContract;
 use App\Repositories\Order\OrderRepositoryContract;
 use App\Repositories\Payment\PaymentRepositoryContract;
@@ -38,10 +39,14 @@ class PurchaseService implements PurchaseServiceContract
      */
     public function reserve(array $user, array $items, string $ipg): string
     {
+        $ipgClass = config('ipgs.' . $ipg);
+        if ($ipgClass == null) {
+            throw new CustomizedException("invalid ipg");
+        }
         /** @var IpgDriver $ipgDriver */
         $ipgDriver = app()->makeWith(
             IpgDriverContract::class, [
-                'ipgStrategy' => app()->make(config('ipgs.' . $ipg))
+                'ipgStrategy' => app()->make($ipgClass)
             ]
         );
         $paymentId = $this->reserveInDatabase($user, $items, $ipg);
@@ -100,10 +105,14 @@ class PurchaseService implements PurchaseServiceContract
      */
     public function confirm(string $bank_kind, string $payment_code, bool $success)
     {
+        $ipgClass = config('ipgs.' . $bank_kind);
+        if ($ipgClass == null) {
+            throw new CustomizedException("invalid ipg");
+        }
         /** @var IpgDriver $ipgDriver */
         $ipgDriver = app()->makeWith(
             IpgDriverContract::class, [
-                'ipgStrategy' => app()->make(config('ipgs.' . $bank_kind))
+                'ipgStrategy' => app()->make($ipgClass)
             ]
         );
         $paymentId = $ipgDriver->getPaymentIdByCode($payment_code);

@@ -5,5 +5,8 @@ namespace App\strategies\Ipg;
 interface IpgContract
 {
 
-    public function getUrlParam();
+    /**
+     * @return string
+     */
+    public function getUrlParam(): string;
 }

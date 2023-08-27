@@ -44,6 +44,11 @@ class PaymentRepositoryCachingDecorator implements PaymentRepositoryContract
         return $payment;
     }
 
+    /**
+     * @param int $paymentId
+     * @return void
+     * @throws CustomizedException
+     */
     public function fail(int $paymentId)
     {
         $cacheKey = self::PAYMENT_CACHE_PREFIX . $paymentId;
@@ -58,6 +63,11 @@ class PaymentRepositoryCachingDecorator implements PaymentRepositoryContract
         $this->paymentRepository->fail($paymentId);
     }
 
+    /**
+     * @param int $paymentId
+     * @return void
+     * @throws CustomizedException
+     */
     public function apply(int $paymentId)
     {
         $cacheKey = self::PAYMENT_CACHE_PREFIX . $paymentId;
@@ -73,6 +83,10 @@ class PaymentRepositoryCachingDecorator implements PaymentRepositoryContract
         $this->paymentRepository->apply($paymentId);
     }
 
+    /**
+     * @param int $paymentId
+     * @return array
+     */
     public function getById(int $paymentId): array
     {
         $cacheKey = self::PAYMENT_CACHE_PREFIX . $paymentId;
