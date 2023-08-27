@@ -1,66 +1,238 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+### this is a samle code and too many things simplified!
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# Requirements : 
 
-## About Laravel
+-  docker and docker-compose    
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+# Run Application
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+```bash
+    sail up -d
+    sail artisan migrate
+    sail artisan db:seed
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+# Apis 
+## Headers
+### **use this headers for all apis**
+```
+Accept : application/json
+Content-Type : application/json
+```
 
-## Learning Laravel
+## users
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Url : http://localhost/api/users
+### Method : GET
+### Params : no parametter needed
+### Return like this :
+ ```json
+[
+    {
+        "id": 1,
+        "username": "Dave Hamill",
+        "created_at": "2023-08-26T20:57:46.000000Z",
+        "updated_at": "2023-08-26T20:57:46.000000Z"
+    },
+    {
+        "id": 2,
+        "username": "Mr. Will Jacobson V",
+        "created_at": "2023-08-26T20:57:46.000000Z",
+        "updated_at": "2023-08-26T20:57:46.000000Z"
+    }
+]
+ ```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## products
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Url : http://localhost/api/products
+### Method : GET
+### Params : no parametter needed
+### Return like this :
+ ```json
+[
+    {
+        "id": 1,
+        "name": "quasi Schaden-McClure",
+        "price": 8586428,
+        "inventory": 1213,
+        "created_at": "2023-08-26T20:57:46.000000Z",
+        "updated_at": "2023-08-26T20:57:46.000000Z"
+    },
+    {
+        "id": 2,
+        "name": "quisquam Bergstrom, Crooks and Okuneva",
+        "price": 4815810,
+        "inventory": 4443,
+        "created_at": "2023-08-26T20:57:46.000000Z",
+        "updated_at": "2023-08-26T20:57:46.000000Z"
+    }
+]
+ ```
 
-## Laravel Sponsors
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+### Url : http://localhost/api/orders/reserve
+### Method : POST
+### body like this :
+```json
+{
+    "ipg" : "ipga",
+    "user_id" : 1,
+    "username" : "Dave Hamill",
+    "items": [
+        {
+            "product_id": 3,
+            "quantity": 10
+        },
+        {
+            "product_id": 4,
+            "quantity": 5
+        }
+    ]
+}
+```
 
-### Premium Partners
+### Return like this :
+```json
+{
+    "message": "successfully reserved for confirm your purchase use bank urls : success if paid , failed if not paid",
+    "success_url": "http:\/\/127.0.0.1\/api\/orders\/return_bank\/ipga\/MTE=?success=1",
+    "failed_url": "http:\/\/127.0.0.1\/api\/orders\/return_bank\/ipga\/MTE=?success=0"
+}
+```
+### or return this one if your username and user_id not match :
+```json
+{
+	"message": "Unauthenticated."
+}
+```
+### or you may get an validation error like this
+```json
+{
+	"message": "The items.0.product_id field is required.",
+	"errors": {
+		"items.0.product_id": [
+			"The items.0.product_id field is required."
+		]
+	}
+}
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+## order confirm
+- this will generate by order reserve api 
+### Url : http://localhost/api/orders/return_bank/{ipg_code}/{payment_code}?success={boolean}
+### Method : GET
+### parameters : 
+- ipg_code : values (ipga or ipgb)
+- payment_code : based on payment_id
+- success : means payment done correctly or not - values (0 or 1)
+### Return like this:
+- status code **201**
+- body : empty
+### Or return like this if you use that twice:
+- status code **400**
+```json
+{
+    "message": "only one time you can call confirm page"
+}
+```
 
-## Contributing
+## orders with order-items
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Url : http://localhost/api/orders
+### Method : GET
+### Params : no parametter needed
+### Return like this :
+ ```json
+[
+    {
+        "id": 1,
+        "user_id": 1,
+        "status": "performed",
+        "reserved_at": "2023-08-26T21:01:47.000000Z",
+        "created_at": "2023-08-26T21:01:47.000000Z",
+        "updated_at": "2023-08-26T21:02:31.000000Z",
+        "order_items": [
+            {
+                "id": 1,
+                "order_id": 1,
+                "product_id": 3,
+                "user_id": 1,
+                "quantity": 10,
+                "created_at": "2023-08-26T21:01:47.000000Z",
+                "updated_at": "2023-08-26T21:01:47.000000Z"
+            },
+            {
+                "id": 2,
+                "order_id": 1,
+                "product_id": 4,
+                "user_id": 1,
+                "quantity": 3,
+                "created_at": "2023-08-26T21:01:47.000000Z",
+                "updated_at": "2023-08-26T21:01:47.000000Z"
+            }
+        ]
+    },
+    {
+        "id": 6,
+        "user_id": 1,
+        "status": "reserved",
+        "reserved_at": "2023-08-26T23:01:35.000000Z",
+        "created_at": "2023-08-26T23:01:35.000000Z",
+        "updated_at": "2023-08-26T23:01:35.000000Z",
+        "order_items": [
+            {
+                "id": 9,
+                "order_id": 6,
+                "product_id": 3,
+                "user_id": 1,
+                "quantity": 10,
+                "created_at": "2023-08-26T23:01:35.000000Z",
+                "updated_at": "2023-08-26T23:01:35.000000Z"
+            },
+            {
+                "id": 10,
+                "order_id": 6,
+                "product_id": 4,
+                "user_id": 1,
+                "quantity": 3,
+                "created_at": "2023-08-26T23:01:35.000000Z",
+                "updated_at": "2023-08-26T23:01:35.000000Z"
+            }
+        ]
+    }
+]
+ ```
 
-## Code of Conduct
+## payments
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Url : http://localhost/api/payments
+### Method : GET
+### Params : no parametter needed
+### Return like this :
+ ```json
+[
+    {
+        "id": 1,
+        "order_id": 1,
+        "user_id": 1,
+        "amount": 44199845,
+        "gateway_type": "ipga",
+        "status": "completed",
+        "paid_at": "2023-08-26T21:02:31.000000Z",
+        "created_at": "2023-08-26T21:01:47.000000Z",
+        "updated_at": "2023-08-26T21:02:31.000000Z"
+    },
+    {
+        "id": 2,
+        "order_id": 2,
+        "user_id": 1,
+        "amount": 44199845,
+        "gateway_type": "ipga",
+        "status": "completed",
+        "paid_at": "2023-08-26T21:11:38.000000Z",
+        "created_at": "2023-08-26T21:05:53.000000Z",
+        "updated_at": "2023-08-26T21:11:38.000000Z"
+    }
+]
+ ```

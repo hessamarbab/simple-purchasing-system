@@ -53,8 +53,8 @@ class OrderController extends Controller
         $items = $request->input('items');
         $bankUrl = $purchaseService->reserve($user, $items, $ipg);
         $response = [
-            'message' => 'successfully reserved for confirm your purchase use bank urls " .
-                ": success if paid , failed if not paid',
+            'message' => "successfully reserved for confirm your purchase use bank urls " .
+                ": success if paid , failed if not paid",
             'success_url' => $bankUrl . "?success=1",
             'failed_url' => $bankUrl . "?success=0",
         ];
