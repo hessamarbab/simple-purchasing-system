@@ -106,7 +106,7 @@ Content-Type : application/json
 	"message": "Unauthenticated."
 }
 ```
-### or you may get an validation error like this
+### or you may get an validation error like this :
 ```json
 {
 	"message": "The items.0.product_id field is required.",
@@ -134,6 +134,17 @@ Content-Type : application/json
 ```json
 {
     "message": "only one time you can call confirm page"
+}
+```
+### or you may get an validation error like this :
+```json
+{
+	"message": "The success field must be true or false.",
+	"errors": {
+		"success": [
+			"The success field must be true or false."
+		]
+	}
 }
 ```
 
