@@ -13,7 +13,7 @@ class PurchasingTest extends TestCase
     /**
      * A basic feature test example.
      */
-    public function test_validation_reserve(): void
+    public function test_validations_and_exceptions_for_reserve(): void
     {
         $this->seed();
         $products = json_decode($this->get('/api/products')->getContent());
@@ -90,6 +90,11 @@ class PurchasingTest extends TestCase
             ]
         );
         $response->assertStatus(400);
+    }
+
+    public function test_validations_and_exceptions_for_confirm(): void
+    {
 
     }
+
 }

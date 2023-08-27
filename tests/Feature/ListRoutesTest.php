@@ -13,6 +13,9 @@ class ListRoutesTest extends TestCase
 
     public function test_the_application_returns_successful_response(): void
     {
+        $response = $this->get('/api/wrong_route');
+        $response->assertStatus(404);
+
         $response = $this->get('/api/users');
         $response->assertStatus(200);
 
