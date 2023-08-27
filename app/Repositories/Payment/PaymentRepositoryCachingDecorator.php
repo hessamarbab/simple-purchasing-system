@@ -3,10 +3,14 @@
 namespace App\Repositories\Payment;
 
 use App\Enums\PaymentStatusEnum;
+use App\Exceptions\CustomizedException;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class PaymentRepositoryCachingDecorator implements PaymentRepositoryContract
 {
+    const PAYMENT_CACHE_PREFIX = 'PAYMENT_';
 
     /**
      * @param PaymentRepositoryContract $paymentRepository
@@ -34,25 +38,49 @@ class PaymentRepositoryCachingDecorator implements PaymentRepositoryContract
      */
     public function create(int $user_id, int $order_id, int $amount, string $ipg): array
     {
-        // TODO: Implement create() method.
-        return $this->paymentRepository->create($user_id, $order_id, $amount, $ipg);
+        $payment = $this->paymentRepository->create($user_id, $order_id, $amount, $ipg);
+        $cacheKey = self::PAYMENT_CACHE_PREFIX . $payment['id'];
+        Cache::put($cacheKey, $payment, $this->ttl);
+        return $payment;
     }
 
     public function fail(int $paymentId)
     {
-        // TODO: Implement fail() method.
+        $cacheKey = self::PAYMENT_CACHE_PREFIX . $paymentId;
+        $payment = Cache::get($cacheKey);
+        if ($payment != null) {
+            if ($payment['status'] != PaymentStatusEnum::PENDING->value) {
+                throw new CustomizedException("only one time you can call confirm page");
+            }
+            $payment['status'] = PaymentStatusEnum::CANCELED->value;
+            Cache::put($cacheKey, $payment, $this->ttl);
+        }
         $this->paymentRepository->fail($paymentId);
     }
 
     public function apply(int $paymentId)
     {
-        // TODO: Implement apply() method.
+        $cacheKey = self::PAYMENT_CACHE_PREFIX . $paymentId;
+        $payment = Cache::get($cacheKey);
+        if ($payment != null) {
+            if ($payment['status'] != PaymentStatusEnum::PENDING->value) {
+                throw new CustomizedException("only one time you can call confirm page");
+            }
+            $payment['status'] = PaymentStatusEnum::COMPLETED->value;
+            $payment['paid_at'] = Carbon::now();
+            Cache::put($cacheKey, $payment, $this->ttl);
+        }
         $this->paymentRepository->apply($paymentId);
     }
 
     public function getById(int $paymentId): array
     {
-        // TODO: Implement getById() method.
-        return $this->paymentRepository->getById($paymentId);
+        $cacheKey = self::PAYMENT_CACHE_PREFIX . $paymentId;
+        return Cache::remember(
+            $cacheKey,
+            $this->ttl,
+            function () use ($paymentId) {
+                return $this->paymentRepository->getById($paymentId);
+            });
     }
 }

@@ -6,7 +6,7 @@ use App\Enums\PaymentStatusEnum;
 use App\Exceptions\CustomizedException;
 use App\Models\Payment;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 
 class PaymentEloquentRepository implements PaymentRepositoryContract
 {
@@ -35,7 +35,7 @@ class PaymentEloquentRepository implements PaymentRepositoryContract
     public function apply(int $paymentId)
     {
         if(!Payment::where('id', $paymentId)
-            ->where('status', '==', PaymentStatusEnum::PENDING) //cause should work only one time
+            ->where('status', '=', PaymentStatusEnum::PENDING) //cause should work only one time
             ->update([
                 'status' => PaymentStatusEnum::COMPLETED,
                 'paid_at' => Carbon::now()
@@ -47,7 +47,7 @@ class PaymentEloquentRepository implements PaymentRepositoryContract
     public function fail(int $paymentId)
     {
         if(!Payment::where('id', $paymentId)
-            ->where('status', '==', PaymentStatusEnum::PENDING) //cause should work only one time
+            ->where('status', '=', PaymentStatusEnum::PENDING) //cause should work only one time
             ->update(['status' => PaymentStatusEnum::CANCELED])) {
                 throw new CustomizedException("only one time you can call confirm page");
         }

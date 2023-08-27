@@ -2,13 +2,12 @@
 
 namespace App\Repositories\User;
 
-use App\traits\Cacher;
 use Illuminate\Support\Facades\Cache;
 
 class UserRepositoryCachingDecorator implements UserRepositoryContract
 {
     const USER_CACHE_PREFIX = 'USER_';
-    const GET_BY_USERNAME = "GET_BY_USERNAME_";
+    const GET_BY_USERNAME = "BY_USERNAME_";
 
     /**
      * @param UserRepositoryContract $userRepository

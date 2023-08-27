@@ -66,7 +66,6 @@ class OrderEloquentRepository implements OrderRepositoryContract
 
     public function getItems(int $order_id): array
     {
-        // TODO: Implement getItems() method.
         return OrderItem::query()->select('product_id', 'quantity')
                 ->where('order_id', $order_id)->get()->toArray();
     }

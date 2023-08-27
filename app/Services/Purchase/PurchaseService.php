@@ -155,6 +155,4 @@ class PurchaseService implements PurchaseServiceContract
             throw $e;
         }
     }
-
-
 }
