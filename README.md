@@ -271,4 +271,6 @@ Content-Type: application/json
         "updated_at": "2023-08-26T21:11:38.000000Z"
     }
 ]
- ```
+```
+## ![#1589F0](Visit : https://chatgpt.com/s/t_68bc348f9f188191b6b94dde27e0ea9d) to refactor`#1589F0`
+
