@@ -272,5 +272,6 @@ Content-Type: application/json
     }
 ]
 ```
-## ![#1589F0](Visit : https://chatgpt.com/s/t_68bc348f9f188191b6b94dde27e0ea9d) to refactor `#1589F0`
-
+<span style="color: red"> 
+## Visit : https://chatgpt.com/s/t_68bc348f9f188191b6b94dde27e0ea9d to refactor!
+</span>span
