@@ -272,6 +272,5 @@ Content-Type: application/json
     }
 ]
 ```
-$${\color{red}Visit:  https://chatgpt.com/s/t_68bc348f9f188191b6b94dde27e0ea9d  to  refactor!}$$
-
-$${\color{red}Red}$$
+$${\color{red}Visit}$$
+ https://chatgpt.com/s/t_68bc348f9f188191b6b94dde27e0ea9d  to  refactor!
