@@ -23,16 +23,17 @@ class Handler extends ExceptionHandler
      */
     public function register(): void
     {
-        $this->renderable(function (InvalidPaymentGatewayException $e) {
-            return response()->json([
-                'message' => $e->getMessage()
-            ], 400);
-        });
 
         $this->renderable(function (NotFoundHttpException $e) {
             return response()->json([
                 'message' => "Not Found"
             ], 404);
         });
+        $this->renderable(function (CustomizedException $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 400);
+        });
+
     }
 }

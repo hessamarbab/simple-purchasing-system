@@ -4,7 +4,7 @@ namespace App\Factories\Ipg;
 
 use App\Driver\Ipg\IpgDriver;
 use App\Driver\Ipg\IpgDriverContract;
-use App\Exceptions\InvalidPaymentGatewayException;
+use App\Exceptions\CustomizedException;
 
 class IpgDriverFactory implements IpgDriverFactoryContract
 {
@@ -12,7 +12,7 @@ class IpgDriverFactory implements IpgDriverFactoryContract
     {
         $ipgClass = config('ipgs.' . $ipg);
         if ($ipgClass == null) {
-            throw new InvalidPaymentGatewayException("invalid ipg");
+            throw new CustomizedException("invalid ipg");
         }
         /** @var IpgDriver $ipgDriver */
         $ipgDriver = app()->makeWith(
