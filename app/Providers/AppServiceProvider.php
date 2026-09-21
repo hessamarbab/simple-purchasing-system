@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Driver\Ipg\IpgDriver;
 use App\Driver\Ipg\IpgDriverContract;
+use App\Factories\Ipg\IpgDriverFactory;
+use App\Factories\Ipg\IpgDriverFactoryContract;
 use App\Repositories\Atomic\DbTransactionRepositoryCacheDecorator;
 use App\Repositories\Atomic\DbTransactionRepositoryContract;
 use App\Repositories\Order\OrderRepositoryCachingDecorator;
@@ -46,6 +48,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(IpgDriverContract::class , function ($app, $params) {
             return new IpgDriver(...$params);
         });
+        $this->app->bind(IpgDriverFactoryContract::class , function ($app, $params) {
+            return new IpgDriverFactory(...$params);
+        });
+
     }
 
     /**
