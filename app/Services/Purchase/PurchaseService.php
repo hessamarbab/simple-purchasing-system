@@ -4,7 +4,9 @@ namespace App\Services\Purchase;
 
 use App\Driver\Ipg\IpgDriver;
 use App\Driver\Ipg\IpgDriverContract;
-use App\Exceptions\CustomizedException;
+use App\Exceptions\InvalidPaymentGatewayException;
+use App\Factories\Ipg\IpgDriverFactory;
+use App\Factories\Ipg\IpgDriverFactoryContract;
 use App\Repositories\Atomic\DbTransactionRepositoryContract;
 use App\Repositories\Order\OrderRepositoryContract;
 use App\Repositories\Payment\PaymentRepositoryContract;
@@ -16,15 +18,16 @@ class PurchaseService implements PurchaseServiceContract
 {
     /**
      * @param OrderRepositoryContract $orderRepo
-     * @param DbTransactionRepositoryContract $dbRepo
+     * @param DbTransactionRepositoryContract $atomicRepo
      * @param PaymentRepositoryContract $paymentRepo
      * @param ProductRepositoryContract $productRepo
      */
     public function __construct(
-        protected DbTransactionRepositoryContract $dbRepo,
+        protected DbTransactionRepositoryContract $atomicRepo,
         protected OrderRepositoryContract         $orderRepo,
         protected PaymentRepositoryContract       $paymentRepo,
-        protected ProductRepositoryContract       $productRepo
+        protected ProductRepositoryContract       $productRepo,
+        protected IpgDriverFactoryContract $ipgDriverFactory
     )
     {
     }
@@ -37,20 +40,17 @@ class PurchaseService implements PurchaseServiceContract
      */
     public function reserve(array $user, array $items, string $ipg): string
     {
-        $ipgClass = config('ipgs.' . $ipg);
-        if ($ipgClass == null) {
-            throw new CustomizedException("invalid ipg");
-        }
-        /** @var IpgDriver $ipgDriver */
-        $ipgDriver = app()->makeWith(
-            IpgDriverContract::class, [
-                'ipgStrategy' => app()->make($ipgClass)
-            ]
+        $paymentId = $this->reserveOrder(
+            user: $user,
+            items: $items,
+            ipg: $ipg
         );
-        $paymentId = $this->reserveInDatabase($user, $items, $ipg);
 
+        $ipgDriver = $this->ipgDriverFactory->make($ipg);
         return $ipgDriver->generatePaymentUrl($paymentId);
     }
+
+
 
     /**
      * @param array $user
@@ -59,21 +59,22 @@ class PurchaseService implements PurchaseServiceContract
      * @return int
      * @throws Throwable
      */
-    private function reserveInDatabase(array $user, array $items, string $ipg): int
+    private function reserveOrder(array $user, array $items, string $ipg): int
     {
-        $this->dbRepo->beginTransaction();
+        $this->atomicRepo->beginTransaction();
         try {
             $order = $this->orderRepo->create($user['id']);
             $amount = $this->calculateAmount($items);
+
             foreach ($items as $item) {
                 $this->productRepo->reduce($item['product_id'], $item['quantity']);
                 $this->orderRepo->createItem($order['id'], $user['id'],
                     $item['product_id'], $item['quantity']);
             }
             $paymentId = $this->paymentRepo->create($user['id'], $order['id'], $amount, $ipg)['id'];
-            $this->dbRepo->commit();
+            $this->atomicRepo->commit();
         } catch (Throwable $e) {
-            $this->dbRepo->rollback();
+            $this->atomicRepo->rollback();
             throw $e;
         }
         return $paymentId;
@@ -103,22 +104,13 @@ class PurchaseService implements PurchaseServiceContract
      */
     public function confirm(string $bank_kind, string $payment_code, bool $success)
     {
-        $ipgClass = config('ipgs.' . $bank_kind);
-        if ($ipgClass == null) {
-            throw new CustomizedException("invalid ipg");
-        }
         /** @var IpgDriver $ipgDriver */
-        $ipgDriver = app()->makeWith(
-            IpgDriverContract::class, [
-                'ipgStrategy' => app()->make($ipgClass)
-            ]
-        );
+        $ipgDriver = $this->ipgDriverFactory->make($bank_kind);
         $paymentId = $ipgDriver->getPaymentIdByCode($payment_code);
-        if ($success) {
-            $this->applyInDatabase($paymentId);
-        } else {
-            $this->cancelInDatabase($paymentId);
-        }
+
+        $success
+            ? $this->applyPayment($paymentId)
+            : $this->cancelPayment($paymentId);
     }
 
     /**
@@ -126,16 +118,16 @@ class PurchaseService implements PurchaseServiceContract
      * @return void
      * @throws Throwable
      */
-    private function applyInDatabase(int $paymentId)
+    private function applyPayment(int $paymentId): void
     {
-        $this->dbRepo->beginTransaction();
+        $this->atomicRepo->beginTransaction();
         try {
             $payment = $this->paymentRepo->getById($paymentId);
             $this->paymentRepo->apply($paymentId);
             $this->orderRepo->apply($payment['order_id']);
-            $this->dbRepo->commit();
+            $this->atomicRepo->commit();
         } catch (Throwable $e) {
-            $this->dbRepo->rollback();
+            $this->atomicRepo->rollback();
             throw $e;
         }
     }
@@ -145,9 +137,9 @@ class PurchaseService implements PurchaseServiceContract
      * @return void
      * @throws Throwable
      */
-    private function cancelInDatabase(int $paymentId)
+    private function cancelPayment(int $paymentId): void
     {
-        $this->dbRepo->beginTransaction();
+        $this->atomicRepo->beginTransaction();
         try {
             $payment = $this->paymentRepo->getById($paymentId);
             $this->paymentRepo->fail($paymentId);
@@ -156,9 +148,9 @@ class PurchaseService implements PurchaseServiceContract
             foreach ($items as $item) {
                 $this->productRepo->enhance($item['product_id'], $item['quantity']);
             }
-            $this->dbRepo->commit();
+            $this->atomicRepo->commit();
         } catch (Throwable $e) {
-            $this->dbRepo->rollback();
+            $this->atomicRepo->rollback();
             throw $e;
         }
     }
