@@ -3,9 +3,6 @@
 namespace App\Services\Purchase;
 
 use App\Driver\Ipg\IpgDriver;
-use App\Driver\Ipg\IpgDriverContract;
-use App\Exceptions\InvalidPaymentGatewayException;
-use App\Factories\Ipg\IpgDriverFactory;
 use App\Factories\Ipg\IpgDriverFactoryContract;
 use App\Repositories\Atomic\DbTransactionRepositoryContract;
 use App\Repositories\Order\OrderRepositoryContract;

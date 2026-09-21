@@ -4,7 +4,6 @@ namespace App\Repositories\Atomic;
 
 
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Redis;
 use Throwable;
 
 class DbTransactionRepositoryCacheDecorator implements DbTransactionRepositoryContract
