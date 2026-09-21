@@ -51,7 +51,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(IpgDriverFactoryContract::class , function ($app, $params) {
             return new IpgDriverFactory(...$params);
         });
-
     }
 
     /**
