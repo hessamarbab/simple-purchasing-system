@@ -18,11 +18,12 @@ interface ProductRepositoryContract
      */
     public function reduce(int $product_id, int $quantity);
 
+
     /**
-     * @param int $id
+     * @param array $ids
      * @return array
      */
-    public function getById(int $id): array;
+    public function getByIds(array $ids): array;
 
     /**
      * @param int $product_id

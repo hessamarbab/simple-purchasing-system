@@ -16,6 +16,8 @@ use App\Repositories\Product\ProductRepositoryCachingDecorator;
 use App\Repositories\Product\ProductRepositoryContract;
 use App\Repositories\User\UserRepositoryCachingDecorator;
 use App\Repositories\User\UserRepositoryContract;
+use App\Services\Calculator\CalculatorService;
+use App\Services\Calculator\CalculatorServiceContract;
 use App\Services\Purchase\PurchaseService;
 use App\Services\Purchase\PurchaseServiceContract;
 use Illuminate\Support\ServiceProvider;
@@ -48,9 +50,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(IpgDriverContract::class , function ($app, $params) {
             return new IpgDriver(...$params);
         });
-        $this->app->bind(IpgDriverFactoryContract::class , function ($app, $params) {
-            return new IpgDriverFactory(...$params);
-        });
+        $this->app->bind(IpgDriverFactoryContract::class , IpgDriverFactory::class);
+        $this->app->bind(CalculatorServiceContract::class ,  CalculatorService::class);
     }
 
     /**

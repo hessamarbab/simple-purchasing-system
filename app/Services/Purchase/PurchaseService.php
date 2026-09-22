@@ -8,6 +8,7 @@ use App\Repositories\Atomic\DbTransactionRepositoryContract;
 use App\Repositories\Order\OrderRepositoryContract;
 use App\Repositories\Payment\PaymentRepositoryContract;
 use App\Repositories\Product\ProductRepositoryContract;
+use App\Services\Calculator\CalculatorServiceContract;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Throwable;
 
@@ -24,7 +25,8 @@ class PurchaseService implements PurchaseServiceContract
         protected OrderRepositoryContract         $orderRepo,
         protected PaymentRepositoryContract       $paymentRepo,
         protected ProductRepositoryContract       $productRepo,
-        protected IpgDriverFactoryContract $ipgDriverFactory
+        protected IpgDriverFactoryContract $ipgDriverFactory,
+        protected CalculatorServiceContract $calcService
     )
     {
     }
@@ -61,7 +63,7 @@ class PurchaseService implements PurchaseServiceContract
         $this->atomicRepo->beginTransaction();
         try {
             $order = $this->orderRepo->create($user['id']);
-            $amount = $this->calculateAmount($items);
+            $amount = $this->calcService->calculate($items);
 
             foreach ($items as $item) {
                 $this->productRepo->reduce($item['product_id'], $item['quantity']);
@@ -77,19 +79,6 @@ class PurchaseService implements PurchaseServiceContract
         return $paymentId;
     }
 
-    /**
-     * @param array $items
-     * @return int
-     */
-    private function calculateAmount(array $items): int
-    {
-        $amount = 0;
-        foreach ($items as $item) {
-            $product = $this->productRepo->getById($item['product_id']);
-            $amount += $item['quantity'] * $product['price'];
-        }
-        return $amount;
-    }
 
     /**
      * @param string $bank_kind

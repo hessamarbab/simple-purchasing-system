@@ -14,9 +14,11 @@ class ProductRepositoryCachingDecorator implements ProductRepositoryContract
      * @param ProductRepositoryContract $productRepository
      */
     public function __construct(
-        protected int $ttl = 60,
-        protected ProductRepositoryContract $productRepository  = new ProductEloquentRepository()
-    ){}
+        protected int                       $ttl = 60,
+        protected ProductRepositoryContract $productRepository = new ProductEloquentRepository()
+    )
+    {
+    }
 
     /**
      * @return Collection
@@ -33,7 +35,7 @@ class ProductRepositoryCachingDecorator implements ProductRepositoryContract
         $product = Cache::get($cacheKey);
         if ($product != null) {
             $product['inventory'] -= $quantity;
-            if($product['inventory'] < 0) {
+            if ($product['inventory'] < 0) {
                 throw new CustomizedException("there isn't enough inventory");
             }
             Cache::put($cacheKey, $product, $this->ttl);
@@ -42,16 +44,26 @@ class ProductRepositoryCachingDecorator implements ProductRepositoryContract
 
     }
 
-    public function getById(int $id): array
+    public function getByIds(array $ids): array
     {
-        $cacheKey = self::PRODUCT_CACHE_PREFIX . $id;
-        return Cache::remember(
-            $cacheKey,
-            $this->ttl,
-            function () use ($id) {
-                return $this->productRepository->getById($id);
+        $cachedData = [];
+        $notCachedIds = [];
+        foreach ($ids as $id) {
+            $cacheKey = self::PRODUCT_CACHE_PREFIX . $id;
+            $res = Cache::get($cacheKey);
+            if ($res == null) {
+                array_push($notCachedIds, $id);
+            } else {
+                $cachedData[$id] = $res;
             }
-        );
+
+        }
+        $notCachedData = $this->productRepository->getByIds($notCachedIds);
+        foreach ($notCachedData as $item) {
+            $cacheKey = self::PRODUCT_CACHE_PREFIX . $item["id"];
+            Cache::put($cacheKey, $item, $this->ttl);
+        }
+        return $notCachedData + $cachedData;
     }
 
     public function enhance(int $product_id, int $quantity)

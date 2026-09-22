@@ -30,12 +30,12 @@ class ProductEloquentRepository implements ProductRepositoryContract
     }
 
     /**
-     * @param int $id
+     * @param array $ids
      * @return array
      */
-    public function getById(int $id): array
+    public function getByIds(array $ids): array
     {
-        return Product::find($id)->toArray();
+        return Product::select("*")->findMany($ids)->keyBy('id')->toArray();
     }
 
     /**
