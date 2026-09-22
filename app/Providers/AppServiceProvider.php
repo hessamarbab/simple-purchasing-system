@@ -20,6 +20,8 @@ use App\Services\Calculator\CalculatorService;
 use App\Services\Calculator\CalculatorServiceContract;
 use App\Services\Purchase\PurchaseService;
 use App\Services\Purchase\PurchaseServiceContract;
+use App\Services\reserve\OrderReserveService;
+use App\Services\reserve\OrderReserveServiceContract;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -44,14 +46,12 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(OrderRepositoryContract::class, function () {
             return new OrderRepositoryCachingDecorator(config("cache.default_ttl"));
         });
-        $this->app->bind(PurchaseServiceContract::class, function () {
-            return $this->app->make(PurchaseService::class);
-        });
-        $this->app->bind(IpgDriverContract::class , function ($app, $params) {
-            return new IpgDriver(...$params);
-        });
+        $this->app->bind(PurchaseServiceContract::class, PurchaseService::class);
+        $this->app->bind(IpgDriverContract::class, IpgDriver::class);
         $this->app->bind(IpgDriverFactoryContract::class , IpgDriverFactory::class);
         $this->app->bind(CalculatorServiceContract::class ,  CalculatorService::class);
+        $this->app->bind(OrderReserveServiceContract::class,  OrderReserveService::class);
+
     }
 
     /**
